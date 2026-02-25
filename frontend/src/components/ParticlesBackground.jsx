@@ -48,7 +48,7 @@ export const ParticlesBackground = () => {
       },
       particles: {
         color: {
-          value: "#6366f1", // Match the brand indigo theme
+          value: ["#6366f1", "#a855f7", "#06b6d4", "#ec4899", "#10b981"], // Vibrant random colors
         },
         links: {
           color: "#818cf8",
