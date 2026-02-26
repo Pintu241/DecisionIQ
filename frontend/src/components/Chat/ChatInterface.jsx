@@ -62,9 +62,21 @@ If the user asks for a comparison or graphs, you MUST return your entire respons
 {
   "isChartResponse": true,
   "introText": "Brief introduction paragraph summarizing what you found.",
-  "finalRecommendation": "Your final verdict paragraph explaining why you chose a specific option.",
+  "keyInsights": ["Insight 1", "Insight 2", "Insight 3"],
   "performanceData": [ { "name": "Item 1", "PerformanceMetric1": 90, "PerformanceMetric2": 80 } ],
-  "priceData": [ { "name": "Item 1", "value": 1500 } ]
+  "priceData": [ { "name": "Item 1", "value": 1500 } ],
+  "comparisonTable": {
+    "headers": ["Feature", "Item 1", "Item 2"],
+    "rows": [
+      ["Processor", "Intel i7", "AMD Ryzen 7"],
+      ["RAM", "16GB", "32GB"]
+    ]
+  },
+  "prosCons": [
+    { "name": "Item 1", "pros": ["Pro 1"], "cons": ["Con 1"] },
+    { "name": "Item 2", "pros": ["Pro 1"], "cons": ["Con 1"] }
+  ],
+  "finalRecommendation": "Your final verdict paragraph explaining why you chose a specific option."
 }
 Make sure performance metrics apply to the question (e.g. CPU/GPU for laptops, Speed/Reliability for internet, etc).
 If the user's question does NOT require charts (or if you are refusing due to the category filter), just return standard text but in JSON format:

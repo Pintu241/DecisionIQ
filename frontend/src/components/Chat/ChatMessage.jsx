@@ -1,5 +1,15 @@
 import React from 'react';
-import { IconUser, IconBrain, IconSparkles } from '@tabler/icons-react';
+import { 
+  IconUser, 
+  IconBrain, 
+  IconSparkles, 
+  IconCheck, 
+  IconX, 
+  IconTable, 
+  IconInfoCircle, 
+  IconThumbUp, 
+  IconThumbDown 
+} from '@tabler/icons-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const COLORS = ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#8b5cf6'];
@@ -30,12 +40,30 @@ export const ChatMessage = ({ msg }) => {
       <div className="h-10 w-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 text-white shadow-sm mt-1">
         <IconBrain size={24} stroke={1.5} />
       </div>
-      <div className="flex-1 pt-1.5 space-y-6">
+      <div className="flex-1 pt-1.5 space-y-8">
         <p className="leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
           {aiData.introText}
         </p>
 
-        {/* Chart Container based on dynamic flag */}
+        {/* Key Insights Section */}
+        {aiData.isChartResponse && aiData.keyInsights && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+              <IconInfoCircle size={18} />
+              Key Insights
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {aiData.keyInsights.map((insight, idx) => (
+                <div key={idx} className="flex gap-3 p-3 rounded-lg bg-white/50 dark:bg-gray-800/50 border border-indigo-100/30 dark:border-gray-700/50 items-start">
+                  <div className="mt-1 text-indigo-500"><IconCheck size={16} stroke={3} /></div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{insight}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Chart Container */}
         {aiData.isChartResponse && aiData.performanceData && aiData.priceData && (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-4">
             
@@ -88,13 +116,88 @@ export const ChatMessage = ({ msg }) => {
           </div>
         )}
 
+        {/* Comparison Table Section */}
+        {aiData.isChartResponse && aiData.comparisonTable && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+              <IconTable size={18} />
+              Detailed Comparison
+            </h3>
+            <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+              <table className="w-full text-left border-collapse min-w-[500px]">
+                <thead>
+                  <tr className="bg-gray-50 dark:bg-gray-900/50">
+                    {aiData.comparisonTable.headers.map((header, idx) => (
+                      <th key={idx} className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                  {aiData.comparisonTable.rows.map((row, rowIdx) => (
+                    <tr key={rowIdx} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors">
+                      {row.map((cell, cellIdx) => (
+                        <td key={cellIdx} className={`p-4 text-sm ${cellIdx === 0 ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Pros & Cons Section */}
+        {aiData.isChartResponse && aiData.prosCons && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {aiData.prosCons.map((item, idx) => (
+              <div key={idx} className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
+                <h4 className="font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 pb-2">{item.name}</h4>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                      <IconThumbUp size={14} /> Pros
+                    </p>
+                    <ul className="space-y-1.5">
+                      {item.pros.map((pro, pIdx) => (
+                        <li key={pIdx} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+                          <span className="mt-1 flex-shrink-0 text-emerald-500"><IconCheck size={14} stroke={3} /></span>
+                          {pro}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                      <IconThumbDown size={14} /> Cons
+                    </p>
+                    <ul className="space-y-1.5">
+                      {item.cons.map((con, cIdx) => (
+                        <li key={cIdx} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+                          <span className="mt-1 flex-shrink-0 text-rose-500"><IconX size={14} stroke={3} /></span>
+                          {con}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Final Recommendation block */}
         {aiData.isChartResponse && aiData.finalRecommendation && (
-          <div className="bg-indigo-600 text-white p-5 rounded-xl shadow-md flex gap-4 items-start">
-            <div className="mt-0.5"><IconSparkles size={20} className="text-indigo-200" /></div>
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-2xl shadow-lg flex gap-4 items-start">
+            <div className="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <IconSparkles size={24} className="text-white" />
+            </div>
             <div>
-              <h4 className="font-semibold mb-1">Final Recommendation</h4>
-              <p className="text-indigo-100 text-sm leading-relaxed whitespace-pre-wrap">{aiData.finalRecommendation}</p>
+              <h4 className="font-bold text-lg mb-1 tracking-tight">Final Recommendation</h4>
+              <p className="text-indigo-50 text-sm leading-relaxed whitespace-pre-wrap">{aiData.finalRecommendation}</p>
             </div>
           </div>
         )}
