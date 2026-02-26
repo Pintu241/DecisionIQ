@@ -1,6 +1,6 @@
-import React from 'react';
-import { IconUser, IconBrain, IconSparkles } from '@tabler/icons-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import React, { useState } from 'react';
+import { IconUser, IconBrain, IconSparkles, IconChartBar, IconChartPie, IconChartArea, IconChartLine } from '@tabler/icons-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line } from 'recharts';
 
 const COLORS = ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#8b5cf6'];
 
@@ -10,6 +10,9 @@ const getBarChartKeys = (data) => {
 };
 
 export const ChatMessage = ({ msg }) => {
+  const [perfChartType, setPerfChartType] = useState('bar'); // bar, area, line
+  const [priceChartType, setPriceChartType] = useState('pie'); // pie, bar
+
   if (msg.role === 'user') {
     return (
       <div className="flex gap-4 p-4 md:p-6 flex-row-reverse">
@@ -38,49 +41,138 @@ export const ChatMessage = ({ msg }) => {
         {/* Chart Container based on dynamic flag */}
         {aiData.isChartResponse && aiData.performanceData && aiData.priceData && (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-4">
-            
-            {/* Dynamic Bar Chart */}
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col h-80 transition-colors">
-              <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-4 text-center">Score Comparison</h3>
+
+            {/* Performance Comparison Chart */}
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col h-80 transition-colors relative group">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">Score Comparison</h3>
+                <div className="flex bg-gray-100 dark:bg-gray-900/50 p-1 rounded-lg">
+                  <button
+                    onClick={() => setPerfChartType('bar')}
+                    className={`p-1 rounded-md transition-colors ${perfChartType === 'bar' ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                    title="Bar Chart"
+                  >
+                    <IconChartBar size={16} />
+                  </button>
+                  <button
+                    onClick={() => setPerfChartType('area')}
+                    className={`p-1 rounded-md transition-colors ${perfChartType === 'area' ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                    title="Area Chart"
+                  >
+                    <IconChartArea size={16} />
+                  </button>
+                  <button
+                    onClick={() => setPerfChartType('line')}
+                    className={`p-1 rounded-md transition-colors ${perfChartType === 'line' ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                    title="Line Chart"
+                  >
+                    <IconChartLine size={16} />
+                  </button>
+                </div>
+              </div>
               <div className="flex-1 min-h-0 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={aiData.performanceData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" className="dark:opacity-10" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#8ca3af' }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#8ca3af' }} />
-                    <RechartsTooltip cursor={{fill: 'transparent'}} contentStyle={{borderRadius: '8px', border: 'none', background: '#374151', color: '#fff'}} />
-                    <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px', color: '#8ca3af' }} />
-                    {getBarChartKeys(aiData.performanceData).map((metricKey, idx) => (
-                      <Bar key={metricKey} dataKey={metricKey} fill={COLORS[idx % COLORS.length]} radius={[4, 4, 0, 0]} />
-                    ))}
-                  </BarChart>
+                  {perfChartType === 'bar' ? (
+                    <BarChart data={aiData.performanceData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" className="dark:opacity-10" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#8ca3af' }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#8ca3af' }} />
+                      <RechartsTooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '8px', border: 'none', background: '#374151', color: '#fff' }} />
+                      <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '10px', color: '#8ca3af' }} />
+                      {getBarChartKeys(aiData.performanceData).map((metricKey, idx) => (
+                        <Bar key={metricKey} dataKey={metricKey} fill={COLORS[idx % COLORS.length]} radius={[4, 4, 0, 0]} />
+                      ))}
+                    </BarChart>
+                  ) : perfChartType === 'area' ? (
+                    <AreaChart data={aiData.performanceData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                      <defs>
+                        {getBarChartKeys(aiData.performanceData).map((metricKey, idx) => (
+                          <linearGradient key={`grad-${metricKey}`} id={`color-${metricKey}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={COLORS[idx % COLORS.length]} stopOpacity={0.8} />
+                            <stop offset="95%" stopColor={COLORS[idx % COLORS.length]} stopOpacity={0} />
+                          </linearGradient>
+                        ))}
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" className="dark:opacity-10" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#8ca3af' }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#8ca3af' }} />
+                      <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', background: '#374151', color: '#fff' }} />
+                      <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '10px', color: '#8ca3af' }} />
+                      {getBarChartKeys(aiData.performanceData).map((metricKey, idx) => (
+                        <Area key={metricKey} type="monotone" dataKey={metricKey} stroke={COLORS[idx % COLORS.length]} fillOpacity={1} fill={`url(#color-${metricKey})`} />
+                      ))}
+                    </AreaChart>
+                  ) : (
+                    <LineChart data={aiData.performanceData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" className="dark:opacity-10" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#8ca3af' }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#8ca3af' }} />
+                      <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', background: '#374151', color: '#fff' }} />
+                      <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '10px', color: '#8ca3af' }} />
+                      {getBarChartKeys(aiData.performanceData).map((metricKey, idx) => (
+                        <Line key={metricKey} type="monotone" dataKey={metricKey} stroke={COLORS[idx % COLORS.length]} strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                      ))}
+                    </LineChart>
+                  )}
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Dynamic Pie Chart */}
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col h-80 transition-colors">
-              <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-4 text-center">Value Representation</h3>
+            {/* Value Representation Chart */}
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col h-80 transition-colors relative group">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">Value Representation</h3>
+                <div className="flex bg-gray-100 dark:bg-gray-900/50 p-1 rounded-lg">
+                  <button
+                    onClick={() => setPriceChartType('pie')}
+                    className={`p-1 rounded-md transition-colors ${priceChartType === 'pie' ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                    title="Pie Chart"
+                  >
+                    <IconChartPie size={16} />
+                  </button>
+                  <button
+                    onClick={() => setPriceChartType('bar')}
+                    className={`p-1 rounded-md transition-colors ${priceChartType === 'bar' ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                    title="Bar Chart"
+                  >
+                    <IconChartBar size={16} />
+                  </button>
+                </div>
+              </div>
               <div className="flex-1 min-h-0 w-full flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={aiData.priceData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      labelLine={false}
-                    >
-                      {aiData.priceData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip contentStyle={{borderRadius: '8px', border: 'none', background: '#374151', color: '#fff'}} />
-                  </PieChart>
+                  {priceChartType === 'pie' ? (
+                    <PieChart>
+                      <Pie
+                        data={aiData.priceData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        labelLine={false}
+                      >
+                        {aiData.priceData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', background: '#374151', color: '#fff' }} />
+                    </PieChart>
+                  ) : (
+                    <BarChart data={aiData.priceData} margin={{ top: 20, right: 30, left: -20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" className="dark:opacity-10" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#8ca3af' }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#8ca3af' }} />
+                      <RechartsTooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '8px', border: 'none', background: '#374151', color: '#fff' }} />
+                      <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]}>
+                        {aiData.priceData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  )}
                 </ResponsiveContainer>
               </div>
             </div>

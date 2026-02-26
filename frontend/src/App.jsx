@@ -11,6 +11,7 @@ function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [resumedHistoryItem, setResumedHistoryItem] = useState(null);
 
   React.useEffect(() => {
     if (isDarkMode) {
@@ -45,11 +46,16 @@ function App() {
         ) : activeTab === 'Profile' && isAuthenticated ? (
           <ProfilePage onLogout={handleLogout} />
         ) : activeTab === 'History' && isAuthenticated ? (
-          <HistoryPage />
+          <HistoryPage onRevisit={(item) => {
+            setResumedHistoryItem(item);
+            setActiveTab('Dashboard');
+          }} />
         ) : (
           <ChatInterface
             isAuthenticated={isAuthenticated}
             onRequireAuth={() => setIsAuthModalOpen(true)}
+            resumedHistoryItem={resumedHistoryItem}
+            setResumedHistoryItem={setResumedHistoryItem}
           />
         )}
       </MainLayout>

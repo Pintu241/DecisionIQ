@@ -6,7 +6,7 @@ import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { ParticlesBackground } from '../ParticlesBackground';
 
-export const ChatInterface = ({ isAuthenticated, onRequireAuth }) => {
+export const ChatInterface = ({ isAuthenticated, onRequireAuth, resumedHistoryItem, setResumedHistoryItem }) => {
   const [inputMessage, setInputMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +23,20 @@ export const ChatInterface = ({ isAuthenticated, onRequireAuth }) => {
       }, 100);
     }
   }, [messages, isLoading]);
+
+  // Handle resumed history item
+  useEffect(() => {
+    if (resumedHistoryItem) {
+      setMessages([
+        { role: 'user', content: resumedHistoryItem.query },
+        { role: 'assistant', data: resumedHistoryItem.response }
+      ]);
+      setSelectedFilter(resumedHistoryItem.category || 'All');
+
+      // Clear the resume state in parent so it doesn't re-trigger on tab switch
+      setResumedHistoryItem(null);
+    }
+  }, [resumedHistoryItem, setResumedHistoryItem]);
 
   const handleSend = async () => {
     if (!isAuthenticated) {
@@ -126,6 +140,56 @@ Return ONLY valid raw JSON, do not wrap it in markdown \`\`\`json block. Keep it
     }
   };
 
+  const handleFileUpload = async (file) => {
+    if (!isAuthenticated) {
+      onRequireAuth();
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setIsLoading(true);
+    setMessages(prev => [...prev, { role: 'user', content: `Uploaded dataset: ${file.name}` }]);
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post('/api/upload/dataset', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const parsedData = response.data;
+      setMessages(prev => [...prev, { role: 'assistant', data: parsedData }]);
+
+      // Save to History (Backend handles the initial save if we want, but since ChatInterface usually saves...)
+      // The upload endpoint already analyzed it, but let's log it in History too
+      if (isAuthenticated) {
+        axios.post('/api/history', {
+          query: `Analyzed dataset: ${file.name}`,
+          response: parsedData,
+          category: selectedFilter
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(err => console.error("History Save Error", err));
+      }
+
+    } catch (error) {
+      console.error("Upload Error", error);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        data: {
+          isChartResponse: false,
+          introText: "Error analyzing dataset: " + (error.response?.data?.message || error.message || "Something went wrong.")
+        }
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full w-full relative min-h-0 bg-transparent transition-colors">
 
@@ -147,6 +211,7 @@ Return ONLY valid raw JSON, do not wrap it in markdown \`\`\`json block. Keep it
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="text-xs bg-white dark:bg-gray-800 border border-indigo-100 dark:border-gray-700 px-3 py-1.5 rounded-full text-indigo-600 dark:text-indigo-400 font-medium cursor-pointer hover:bg-indigo-50 dark:hover:bg-gray-700 transition-colors" onClick={() => setInputMessage("Which laptop should I buy? Please show comparison in Bar and Pie charts")}>"Compare the best laptops"</span>
                 <span className="text-xs bg-white dark:bg-gray-800 border border-indigo-100 dark:border-gray-700 px-3 py-1.5 rounded-full text-indigo-600 dark:text-indigo-400 font-medium cursor-pointer hover:bg-indigo-50 dark:hover:bg-gray-700 transition-colors" onClick={() => setInputMessage("Compare top CRM softwares for a small business")}>"Compare top CRM softwares"</span>
+                <span className="text-xs bg-indigo-600 border border-indigo-500 px-3 py-1.5 rounded-full text-white font-medium cursor-default shadow-sm">Dataset Analysis (Excel) Available ↓</span>
               </div>
             </div>
           </div>
@@ -163,7 +228,7 @@ Return ONLY valid raw JSON, do not wrap it in markdown \`\`\`json block. Keep it
                 <IconLoader2 size={24} stroke={2} className="animate-spin" />
               </div>
               <div className="flex-1 pt-2">
-                <p className="text-indigo-500 dark:text-indigo-400 font-medium animate-pulse">Decision IQ is thinking...</p>
+                <p className="text-indigo-500 dark:text-indigo-400 font-medium animate-pulse">Decision IQ is analyzing your data...</p>
               </div>
             </div>
           )}
@@ -183,6 +248,7 @@ Return ONLY valid raw JSON, do not wrap it in markdown \`\`\`json block. Keep it
         onRequireAuth={onRequireAuth}
         selectedFilter={selectedFilter}
         setSelectedFilter={setSelectedFilter}
+        onFileUpload={handleFileUpload}
       />
     </div>
   );
