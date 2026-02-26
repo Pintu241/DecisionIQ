@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { IconHistory, IconTrash, IconChevronRight, IconLoader2, IconSearchOff, IconAlertCircle } from '@tabler/icons-react';
 
-export const HistoryPage = () => {
+export const HistoryPage = ({ onRevisit }) => {
     const [history, setHistory] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -39,6 +39,19 @@ export const HistoryPage = () => {
             setHistory([]);
         } catch (err) {
             alert('Failed to clear history');
+            console.error(err);
+        }
+    };
+
+    const handleDeleteSingle = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`/api/history/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setHistory(prev => prev.filter(item => item._id !== id));
+        } catch (err) {
+            alert('Failed to delete item');
             console.error(err);
         }
     };
@@ -94,6 +107,7 @@ export const HistoryPage = () => {
                         {history.map((item) => (
                             <div
                                 key={item._id}
+                                onClick={() => onRevisit && onRevisit(item)}
                                 className="group bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-800 hover:shadow-md transition-all cursor-pointer"
                             >
                                 <div className="flex items-start justify-between">
@@ -113,8 +127,20 @@ export const HistoryPage = () => {
                                             "{item.response.introText}"
                                         </p>
                                     </div>
-                                    <div className="self-center ml-4 text-gray-300 dark:text-gray-600 group-hover:text-indigo-500 transition-colors">
-                                        <IconChevronRight size={24} />
+                                    <div className="flex flex-col items-center gap-2 ml-4">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteSingle(item._id);
+                                            }}
+                                            className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-all"
+                                            title="Delete history item"
+                                        >
+                                            <IconTrash size={18} />
+                                        </button>
+                                        <div className="text-gray-300 dark:text-gray-600 group-hover:text-indigo-500 transition-colors">
+                                            <IconChevronRight size={20} />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
