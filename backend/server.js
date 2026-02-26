@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const historyRoutes = require('./routes/historyRoutes');
@@ -28,6 +29,15 @@ app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'up',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    });
+});
+
 // Connect to MongoDB and Start Server
 const startServer = async () => {
     try {
@@ -39,10 +49,12 @@ const startServer = async () => {
             app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
         }
     } catch (error) {
-        console.error("Failed to start server due to DB connection error.");
+
+        console.error("Failed to start server due to DB connection error");
         process.exit(1);
     }
 };
+
 
 startServer();
 
