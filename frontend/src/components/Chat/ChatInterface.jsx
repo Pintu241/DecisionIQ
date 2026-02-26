@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IconBrain, IconLoader2 } from '@tabler/icons-react';
+import axios from 'axios';
 import { GoogleGenAI } from '@google/genai';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
@@ -29,10 +30,10 @@ export const ChatInterface = ({ isAuthenticated, onRequireAuth }) => {
       return;
     }
     if (!inputMessage.trim()) return;
-    
+
     const userText = inputMessage.trim();
     setInputMessage('');
-    
+
     // Add user message to history
     setMessages(prev => [...prev, { role: 'user', content: userText }]);
     setIsLoading(true);
@@ -84,29 +85,41 @@ Return ONLY valid raw JSON, do not wrap it in markdown \`\`\`json block. Keep it
       const responseText = typeof response.text === 'function' ? response.text() : (response.text || '');
       const trimmedText = responseText.trim();
       let parsedData;
-      
+
       try {
         // Handle cases where the model might still wrap it in markdown
         const cleanedText = trimmedText.replace(/```json/g, '').replace(/```/g, '').trim();
         parsedData = JSON.parse(cleanedText);
       } catch (e) {
         console.error("Failed to parse JSON", responseText, e);
-        parsedData = { 
-          isChartResponse: false, 
-          introText: "I'm having trouble formatting the data. Here is my raw response:\n\n" + responseText 
+        parsedData = {
+          isChartResponse: false,
+          introText: "I'm having trouble formatting the data. Here is my raw response:\n\n" + responseText
         };
       }
 
       setMessages(prev => [...prev, { role: 'assistant', data: parsedData }]);
 
+      // Save to History (Async)
+      if (isAuthenticated) {
+        const token = localStorage.getItem('token');
+        axios.post('/api/history', {
+          query: userText,
+          response: parsedData,
+          category: selectedFilter
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(err => console.error("History Save Error", err));
+      }
+
     } catch (error) {
       console.error("API Error", error);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        data: { 
-          isChartResponse: false, 
-          introText: "Error: " + (error.message || "Failed to reach the AI API. Make sure VITE_GEMINI_API_KEY is properly set in the .env file and restart the development server.") 
-        } 
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        data: {
+          isChartResponse: false,
+          introText: "Error: " + (error.message || "Failed to reach the AI API. Make sure VITE_GEMINI_API_KEY is properly set in the .env file and restart the development server.")
+        }
       }]);
     } finally {
       setIsLoading(false);
@@ -115,13 +128,13 @@ Return ONLY valid raw JSON, do not wrap it in markdown \`\`\`json block. Keep it
 
   return (
     <div className="flex flex-col h-full w-full relative min-h-0 bg-transparent transition-colors">
-      
+
       <ParticlesBackground />
 
       {/* Chat History Area */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-48 scroll-smooth relative z-10 pointer-events-none" ref={scrollRef}>
         <div className="max-w-4xl mx-auto space-y-6 pointer-events-auto">
-          
+
           {/* AI Welcome Message (Fixed) */}
           <div className="flex gap-4 p-4 md:p-6 rounded-2xl bg-indigo-50/50 dark:bg-indigo-900/10 text-gray-800 border border-indigo-100/50 dark:border-indigo-500/20 transition-colors">
             <div className="h-10 w-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 text-white shadow-sm mt-1">
@@ -147,7 +160,7 @@ Return ONLY valid raw JSON, do not wrap it in markdown \`\`\`json block. Keep it
           {isLoading && (
             <div className="flex gap-4 p-4 md:p-6 bg-transparent text-gray-800 dark:text-gray-200">
               <div className="h-10 w-10 flex items-center justify-center flex-shrink-0 text-indigo-500 dark:text-indigo-400">
-                  <IconLoader2 size={24} stroke={2} className="animate-spin" />
+                <IconLoader2 size={24} stroke={2} className="animate-spin" />
               </div>
               <div className="flex-1 pt-2">
                 <p className="text-indigo-500 dark:text-indigo-400 font-medium animate-pulse">Decision IQ is thinking...</p>
@@ -161,7 +174,7 @@ Return ONLY valid raw JSON, do not wrap it in markdown \`\`\`json block. Keep it
         </div>
       </div>
 
-      <ChatInput 
+      <ChatInput
         inputMessage={inputMessage}
         setInputMessage={setInputMessage}
         isLoading={isLoading}

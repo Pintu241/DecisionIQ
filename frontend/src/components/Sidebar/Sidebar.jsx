@@ -1,25 +1,30 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  IconDashboard, 
-  IconUser, 
-  IconSettings, 
+import {
+  IconDashboard,
+  IconUser,
+  IconSettings,
   IconLogout,
+  IconLogin,
   IconBrain,
   IconMoon,
-  IconSun
+  IconSun,
+  IconHistory
 } from '@tabler/icons-react';
 
 import { SidebarItem } from './SidebarItem';
 import { UserProfile } from './UserProfile';
 
-export const Sidebar = ({ isExpanded, setIsExpanded, activeTab, setActiveTab, onLogout, isDarkMode, setIsDarkMode }) => {
+export const Sidebar = ({ isExpanded, setIsExpanded, activeTab, setActiveTab, onLogout, isAuthenticated, onRequireAuth, isDarkMode, setIsDarkMode }) => {
 
   const navItems = [
     { label: 'Dashboard', icon: IconDashboard },
+    { label: 'History', icon: IconHistory },
     { label: 'Profile', icon: IconUser },
     { label: 'Settings', icon: IconSettings },
-    { label: 'Logout', icon: IconLogout },
+    isAuthenticated
+      ? { label: 'Logout', icon: IconLogout }
+      : { label: 'Login', icon: IconLogin },
   ];
 
   return (
@@ -62,9 +67,11 @@ export const Sidebar = ({ isExpanded, setIsExpanded, activeTab, setActiveTab, on
             isExpanded={isExpanded}
             onClick={() => {
               if (item.label === 'Logout' && onLogout) {
-                 onLogout();
+                onLogout();
+              } else if (item.label === 'Login' && onRequireAuth) {
+                onRequireAuth();
               } else {
-                 setActiveTab(item.label);
+                setActiveTab(item.label);
               }
             }}
           />
@@ -72,7 +79,7 @@ export const Sidebar = ({ isExpanded, setIsExpanded, activeTab, setActiveTab, on
       </div>
 
       {/* Theme Toggle */}
-      <div 
+      <div
         onClick={() => setIsDarkMode(!isDarkMode)}
         className="flex items-center p-2 mb-4 mx-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors"
         title="Toggle Theme"

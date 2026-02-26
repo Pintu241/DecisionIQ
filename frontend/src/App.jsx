@@ -4,6 +4,7 @@ import { ChatInterface } from './components/Chat';
 import { AuthModal } from './components/Auth';
 import { ProfilePage } from './components/Profile/ProfilePage';
 import { SettingsPage } from './components/Settings/SettingsPage';
+import { HistoryPage } from './components/History/HistoryPage';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('token'));
@@ -23,7 +24,7 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('userInfo');
     setIsAuthenticated(false);
-    
+
     setActiveTab('Dashboard'); // redirect home on logout
 
   };
@@ -43,18 +44,20 @@ function App() {
           <SettingsPage />
         ) : activeTab === 'Profile' && isAuthenticated ? (
           <ProfilePage onLogout={handleLogout} />
+        ) : activeTab === 'History' && isAuthenticated ? (
+          <HistoryPage />
         ) : (
-          <ChatInterface 
-            isAuthenticated={isAuthenticated} 
-            onRequireAuth={() => setIsAuthModalOpen(true)} 
+          <ChatInterface
+            isAuthenticated={isAuthenticated}
+            onRequireAuth={() => setIsAuthModalOpen(true)}
           />
         )}
       </MainLayout>
 
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
-        onLogin={() => setIsAuthenticated(true)} 
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onLogin={() => setIsAuthenticated(true)}
       />
     </>
   );
