@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const { comparePassword, hashPassword } = require('../utils/auth');
 
 // Generate JWT token
 const generateToken = (id) => {
@@ -8,9 +9,6 @@ const generateToken = (id) => {
     });
 };
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
-// @access  Public
 const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
 
@@ -21,10 +19,12 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
+        const hashedPassword = await hashPassword(password);
+
         const user = await User.create({
             name,
             email,
-            password,
+            password: hashedPassword,
         });
 
         if (user) {
@@ -42,16 +42,13 @@ const registerUser = async (req, res) => {
     }
 };
 
-// @desc    Auth user & get token
-// @route   POST /api/auth/login
-// @access  Public
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
         const user = await User.findOne({ email });
 
-        if (user && (await user.matchPassword(password))) {
+        if (user && (await comparePassword(password, user.password))) {
             res.json({
                 _id: user._id,
                 name: user.name,
@@ -66,4 +63,31 @@ const loginUser = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser };
+const updatePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Verify current password
+        const isMatch = await comparePassword(currentPassword, user.password);
+
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Invalid current password' });
+        }
+
+        // Hash new password and update
+        user.password = await hashPassword(newPassword);
+        await user.save();
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { registerUser, loginUser, updatePassword };
