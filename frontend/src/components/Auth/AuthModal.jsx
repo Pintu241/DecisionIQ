@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IconX, IconBrandGoogle, IconBrandGithub, IconEye, IconEyeOff } from '@tabler/icons-react';
+import { IconX, IconBrandGoogle, IconEye, IconEyeOff } from '@tabler/icons-react';
 import { auth, googleProvider, signInWithPopup } from '../../firebaseConfig';
 
 export const AuthModal = ({ isOpen, onClose, onLogin }) => {
@@ -82,8 +82,8 @@ export const AuthModal = ({ isOpen, onClose, onLogin }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900/95 backdrop-blur-xl animate-in fade-in duration-300">
+      <div className="bg-gradient-to-br from-white/95 via-indigo-50/80 to-white/85 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden relative animate-in zoom-in-95 duration-300 border border-white/20">
 
         {/* Close Button */}
         <button
@@ -107,13 +107,9 @@ export const AuthModal = ({ isOpen, onClose, onLogin }) => {
 
           {/* Social Logins */}
           <div className="flex gap-4 mb-6">
-            <button onClick={handleGoogleSignIn} type="button" className="flex-1 flex justify-center items-center gap-2 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700">
+            <button onClick={handleGoogleSignIn} type="button" className="flex-1 flex justify-center items-center gap-2 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700 bg-white shadow-sm hover:shadow-md">
               <IconBrandGoogle size={18} />
-              Google
-            </button>
-            <button type="button" className="flex-1 flex justify-center items-center gap-2 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700">
-              <IconBrandGithub size={18} />
-              GitHub
+              Sign in with Google
             </button>
           </div>
 
