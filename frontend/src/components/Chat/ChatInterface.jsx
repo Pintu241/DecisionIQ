@@ -140,11 +140,19 @@ Return ONLY valid raw JSON, do not wrap it in markdown \`\`\`json block. Keep it
 
     } catch (error) {
       console.error("API Error", error);
+      const rawError = (error && (error.message || error.toString())) || "Unknown error";
+      const lowErr = rawError.toLowerCase();
+      let userError = "Error: " + rawError;
+
+      if (lowErr.includes('quota') || lowErr.includes('quota exceeded') || lowErr.includes('daily limit') || lowErr.includes('rate limit')) {
+        userError = "API quota reached or rate limit exceeded. Please wait a moment and try again, or check your Gemini usage quota.";
+      }
+
       setMessages(prev => [...prev, {
         role: 'assistant',
         data: {
           isChartResponse: false,
-          introText: "Error: " + (error.message || "Failed to reach the AI API. Make sure VITE_GEMINI_API_KEY is properly set in the .env file and restart the development server.")
+          introText: userError
         }
       }]);
     } finally {
