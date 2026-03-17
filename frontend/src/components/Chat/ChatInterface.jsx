@@ -55,10 +55,6 @@ export const ChatInterface = ({ isAuthenticated, onRequireAuth, resumedHistoryIt
       const response = await axios.post('/api/ai/chat', {
         prompt: userText,
         filter: selectedFilter
-      }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
       });
 
       const parsedData = response.data;

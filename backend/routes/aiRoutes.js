@@ -1,9 +1,9 @@
 const express = require('express');
 const { chatWithGemini } = require('../controllers/aiController');
-const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-router.post('/chat', protect, chatWithGemini);
+// Public route (no backend JWT required) for Gemini chat. Authentication can be handled in frontend as needed.
+router.post('/chat', chatWithGemini);
 
 module.exports = router;
