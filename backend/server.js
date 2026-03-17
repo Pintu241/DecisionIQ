@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const historyRoutes = require('./routes/historyRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 
 const app = express();
@@ -23,6 +24,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/history', historyRoutes);
+app.use('/api/ai', aiRoutes);
 app.use('/api/upload', uploadRoutes);
 
 app.get('/', (req, res) => {
