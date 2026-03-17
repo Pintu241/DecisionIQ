@@ -78,7 +78,9 @@ export const ChatInterface = ({ isAuthenticated, onRequireAuth, resumedHistoryIt
       const lowErr = rawError.toLowerCase();
       let userError = "Error: " + rawError;
 
-      if (lowErr.includes('quota') || lowErr.includes('quota exceeded') || lowErr.includes('daily limit') || lowErr.includes('rate limit')) {
+      if (error.response?.status === 503 || lowErr.includes('service temporarily unavailable') || lowErr.includes('high demand') || lowErr.includes('unavailable')) {
+        userError = "AI service is currently busy. Please wait a few seconds and try again.";
+      } else if (lowErr.includes('quota') || lowErr.includes('quota exceeded') || lowErr.includes('daily limit') || lowErr.includes('rate limit')) {
         userError = "API quota reached or rate limit exceeded. Please wait a moment and try again, or check your Gemini usage quota.";
       }
 

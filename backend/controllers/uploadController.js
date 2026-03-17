@@ -1,6 +1,32 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const xlsx = require('xlsx');
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const generateContentWithRetry = async (model, content, maxRetries = 3) => {
+    let attempt = 0;
+
+    while (true) {
+        attempt += 1;
+        try {
+            const result = await model.generateContent(content);
+            const response = result?.response;
+            if (!response || typeof response.text !== 'function') {
+                throw new Error('Invalid AI response from Gemini');
+            }
+            return response.text();
+        } catch (err) {
+            const message = (err.response?.data?.error?.message || err.message || '').toString();
+            const isTransient = /503|Unavailable|high demand|rate limit/i.test(message);
+            if (attempt >= maxRetries || !isTransient) {
+                throw err;
+            }
+            console.warn(`Gemini transient error (attempt ${attempt}): ${message}. Retrying...`);
+            await delay(1000 * attempt);
+        }
+    }
+};
+
 /**
  * @desc    Upload and analyze Excel dataset
  * @route   POST /api/upload/dataset
@@ -46,9 +72,7 @@ Return ONLY valid raw JSON.`;
 
         const userPrompt = `Dataset JSON: ${JSON.stringify(data.slice(0, 500))}`; // Limit to first 500 rows for token limits
 
-        const result = await model.generateContent(systemPrompt + "\n\n" + userPrompt);
-        const response = await result.response;
-        const responseText = response.text();
+        const responseText = await generateContentWithRetry(model, systemPrompt + "\n\n" + userPrompt);
 
         // Clean and parse JSON
         const cleanedText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -57,8 +81,12 @@ Return ONLY valid raw JSON.`;
         res.json(parsedData);
     } catch (error) {
         console.error('Upload Error:', error);
-        // Provide more detail in the response for debugging
         const errorMessage = error.response?.data?.error?.message || error.message || 'Unknown error during analysis';
+
+        if (/503|Unavailable|high demand|rate limit/i.test(errorMessage)) {
+            return res.status(503).json({ message: `AI service temporarily unavailable: ${errorMessage}. Please retry in a few seconds.` });
+        }
+
         res.status(500).json({
             message: `Analysis failed: ${errorMessage}`,
             stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
