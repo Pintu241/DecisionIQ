@@ -10,6 +10,18 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+if (import.meta.env.DEV) {
+  const trimmedKey = firebaseConfig.apiKey ? `${firebaseConfig.apiKey.slice(0, 4)}...${firebaseConfig.apiKey.slice(-4)}` : null;
+  console.log('Firebase sanity check:', {
+    apiKey: trimmedKey,
+    authDomain: firebaseConfig.authDomain,
+    projectId: firebaseConfig.projectId,
+    storageBucket: firebaseConfig.storageBucket,
+    messagingSenderId: firebaseConfig.messagingSenderId,
+    appId: firebaseConfig.appId,
+  });
+}
+
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
