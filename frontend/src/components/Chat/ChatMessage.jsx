@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IconUser, IconBrain, IconSparkles, IconChartBar, IconChartPie, IconChartArea, IconChartLine } from '@tabler/icons-react';
+import { IconUser, IconBrain, IconSparkles, IconChartBar, IconChartPie, IconChartArea, IconChartLine, IconInfoCircle, IconCheck, IconTable, IconThumbUp, IconThumbDown, IconX } from '@tabler/icons-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line } from 'recharts';
 
 const COLORS = ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#8b5cf6'];
