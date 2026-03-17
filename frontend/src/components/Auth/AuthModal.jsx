@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { IconX, IconBrandGoogle, IconBrandGithub, IconEye, IconEyeOff } from '@tabler/icons-react';
+import { auth, googleProvider, signInWithPopup } from '../../firebaseConfig';
 
 export const AuthModal = ({ isOpen, onClose, onLogin }) => {
   const [view, setView] = useState('login'); // 'login' or 'register'
@@ -54,6 +55,32 @@ export const AuthModal = ({ isOpen, onClose, onLogin }) => {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setIsLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const idToken = await user.getIdToken();
+
+      // Store user info in local storage to mark as authenticated
+      localStorage.setItem('token', idToken);
+      localStorage.setItem('userInfo', JSON.stringify({ name: user.displayName, email: user.email, provider: 'firebase' }));
+
+      onLogin();
+      onClose();
+
+      // Optional: prepare login/register fields from Google user data
+      setName(user.displayName || '');
+      setEmail(user.email || '');
+    } catch (err) {
+      console.error('Google sign-in failed', err);
+      setError('Google sign-in failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200">
@@ -80,11 +107,11 @@ export const AuthModal = ({ isOpen, onClose, onLogin }) => {
 
           {/* Social Logins */}
           <div className="flex gap-4 mb-6">
-            <button className="flex-1 flex justify-center items-center gap-2 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700">
+            <button onClick={handleGoogleSignIn} type="button" className="flex-1 flex justify-center items-center gap-2 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700">
               <IconBrandGoogle size={18} />
               Google
             </button>
-            <button className="flex-1 flex justify-center items-center gap-2 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700">
+            <button type="button" className="flex-1 flex justify-center items-center gap-2 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700">
               <IconBrandGithub size={18} />
               GitHub
             </button>
