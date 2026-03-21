@@ -20,7 +20,7 @@ export const MainLayout = ({ children, isAuthenticated, onRequireAuth, onLogout,
       />
 
       <main className="flex-1 flex flex-col border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-950 rounded-b-2xl md:rounded-tl-2xl mb-4 mx-4 md:ml-2 mt-0 z-10 overflow-hidden relative min-h-0 min-w-0 transition-colors">
-        <Navbar isAuthenticated={isAuthenticated} onRequireAuth={onRequireAuth} />
+        <Navbar isAuthenticated={isAuthenticated} onRequireAuth={onRequireAuth} onLogout={onLogout} />
         <div className="flex-1 overflow-hidden relative bg-white dark:bg-transparent flex flex-col min-h-0 transition-colors">
           {children}
         </div>
