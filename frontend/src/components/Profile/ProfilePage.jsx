@@ -216,6 +216,21 @@ export const ProfilePage = ({ onLogout }) => {
                 </button>
               </form>
             </div>
+
+            {/* Logout Section */}
+            <div className="mt-8 pt-8 border-t border-gray-100 dark:border-gray-700">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Account Actions</h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-4 text-sm">
+                Log out of your account on this device. You will need to sign back in to access your history and profile.
+              </p>
+              <button
+                onClick={onLogout}
+                className="w-full md:w-auto px-8 py-3 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 font-bold rounded-xl transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2"
+              >
+                Log Out completely
+              </button>
+            </div>
+
           </div>
         </div>
       </div>
