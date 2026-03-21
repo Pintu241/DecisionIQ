@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { IconUser, IconMail, IconCalendar, IconLock, IconCheck, IconAlertCircle, IconEye, IconEyeOff } from '@tabler/icons-react';
-import axios from 'axios';
+import axios from '../../api/axios';
 
 export const ProfilePage = ({ onLogout }) => {
-  // Using generic info as the local storage retrieval was removed
-  const userInfo = { name: "User", email: "account@decisioniq.com" };
+  // Read actual user info saved during login
+  const storedUserInfo = localStorage.getItem('userInfo');
+  const userInfo = storedUserInfo
+    ? JSON.parse(storedUserInfo)
+    : { name: "User", email: "account@decisioniq.com" };
 
   // Password Change State
   const [currentPassword, setCurrentPassword] = useState('');

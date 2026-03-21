@@ -20,11 +20,12 @@ export const AuthModal = ({ isOpen, onClose, onLogin }) => {
     setError('');
     setIsLoading(true);
 
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
     const endpoint = view === 'login' ? '/api/auth/login' : '/api/auth/register';
     const payload = view === 'login' ? { email, password } : { name, email, password };
 
     try {
-      const response = await fetch(`${endpoint}`, {
+      const response = await fetch(`${baseUrl}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

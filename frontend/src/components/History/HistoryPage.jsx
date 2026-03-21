@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../api/axios';
 import { IconHistory, IconTrash, IconChevronRight, IconLoader2, IconSearchOff, IconAlertCircle } from '@tabler/icons-react';
 
 export const HistoryPage = ({ onRevisit }) => {
@@ -124,7 +124,7 @@ export const HistoryPage = ({ onRevisit }) => {
                                             {item.query}
                                         </h3>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 italic">
-                                            "{item.response.introText}"
+                                            "{`${item.response?.introText || 'No preview available'}`}"
                                         </p>
                                     </div>
                                     <div className="flex flex-col items-center gap-2 ml-4">

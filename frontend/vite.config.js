@@ -17,4 +17,3 @@ export default defineConfig(({ mode }) => {
     },
   };
 });
-console.log("Forcing Vite Restart for Tailwind Dark mode");

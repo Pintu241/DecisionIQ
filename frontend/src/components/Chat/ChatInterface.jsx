@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IconBrain, IconLoader2 } from '@tabler/icons-react';
-import axios from 'axios';
+import axios from '../../api/axios';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { ParticlesBackground } from '../ParticlesBackground';
