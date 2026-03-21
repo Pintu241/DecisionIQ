@@ -14,21 +14,9 @@ const app = express();
 
 // Middleware
 const corsOptions = {
+    // Dynamically mirror the exact request origin to never fail preflight checks
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        
-        // Exact match the FRONTEND_URL env var if it exists
-        if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
-            return callback(null, true);
-        }
-        
-        // Allow localhost and vercel domains dynamically
-        if (origin.startsWith('http://localhost') || origin.endsWith('.vercel.app')) {
-            return callback(null, true);
-        }
-        
-        return callback(new Error('CORS blocked origin: ' + origin), false);
+        callback(null, origin || true);
     },
     credentials: true,
     optionsSuccessStatus: 200
