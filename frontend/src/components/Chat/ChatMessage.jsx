@@ -88,7 +88,7 @@ export const ChatMessage = ({ msg }) => {
                   </button>
                 </div>
               </div>
-              <div className="flex-1 min-h-0 w-full">
+              <div className="flex-1 min-h-0 min-w-0 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   {aiData.performanceData && aiData.performanceData.length > 0 ? (
                     perfChartType === 'bar' ? (
@@ -161,7 +161,7 @@ export const ChatMessage = ({ msg }) => {
                   </button>
                 </div>
               </div>
-              <div className="flex-1 min-h-0 w-full flex items-center justify-center">
+              <div className="flex-1 min-h-0 min-w-0 w-full flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
                   {aiData.priceData && aiData.priceData.length > 0 ? (
                     priceChartType === 'pie' ? (
